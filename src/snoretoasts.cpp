@@ -79,7 +79,7 @@ public:
     ComPtr<IToastNotifier> m_notifier;
     ComPtr<IToastNotification> m_notification;
 
-    ComPtr<ToastEventHandler> m_eventHanlder;
+    ComPtr<ToastEventHandler> m_eventHandler;
 
     static HANDLE ctoastEvent()
     {
@@ -181,12 +181,12 @@ HRESULT SnoreToasts::displayToast(const std::wstring &title, const std::wstring 
 
 SnoreToastActions::Actions SnoreToasts::userAction()
 {
-    if (d->m_eventHanlder.Get()) {
-        HANDLE event = d->m_eventHanlder.Get()->event();
+    if (d->m_eventHandler.Get()) {
+        HANDLE event = d->m_eventHandler.Get()->event();
         if (WaitForSingleObject(event, EVENT_TIMEOUT) == WAIT_TIMEOUT) {
             d->m_action = SnoreToastActions::Actions::Error;
         } else {
-            d->m_action = d->m_eventHanlder.Get()->userAction();
+            d->m_action = d->m_eventHandler.Get()->userAction();
         }
         // the initial value is SnoreToastActions::Actions::Hidden so if no action happend when we
         // end up here, a hide was requested
@@ -395,7 +395,7 @@ HRESULT SnoreToasts::setEventHandler(ComPtr<IToastNotification> toast)
     ST_RETURN_ON_ERROR(toast->add_Activated(eventHandler.Get(), &activatedToken));
     ST_RETURN_ON_ERROR(toast->add_Dismissed(eventHandler.Get(), &dismissedToken));
     ST_RETURN_ON_ERROR(toast->add_Failed(eventHandler.Get(), &failedToken));
-    d->m_eventHanlder = eventHandler;
+    d->m_eventHandler = eventHandler;
     return S_OK;
 }
 
